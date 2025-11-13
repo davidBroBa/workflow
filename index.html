@@ -8,16 +8,27 @@
 </head>
 <body>
   <div class="card">
-    <h1>Calculadora con IA</h1>
-    <p>Calcula Operaciones con IA</p>
 
-    <form id="calcForm">
-      <label for="operacion">Escribe tu operación <span style="color:red">*</span></label>
-      <textarea id="operacion" name="operacion" placeholder="Ejemplo: (4+2)*3" required></textarea>
-      <button id="submitBtn" type="submit">Calcular</button>
-    </form>
+    <!-- Nuevo encabezado -->
+    <h1>🔢 SmartCalc IA</h1>
+    <p style="margin-top:-5px;">Resolver operaciones nunca fue tan fácil</p>
 
+    <!-- Caja decorativa alrededor del textarea -->
+    <div style="padding:12px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:15px;">
+      <form id="calcForm">
+        <label for="operacion">Ingresa tu expresión matemática <span style="color:red">*</span></label>
+        <textarea id="operacion" name="operacion" placeholder="Ejemplo: (8/2) + 5 - 1" required></textarea>
+
+        <!-- Botón con icono -->
+        <button id="submitBtn" type="submit">
+          <span>✨ Procesar con IA</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Resultado -->
     <div id="resultado"></div>
+
   </div>
 
   <script>
@@ -32,16 +43,14 @@
 
       const operacion = document.getElementById("operacion").value;
 
-      // 🔸 Inicia animación de "Calculando..."
+      // Animación de "calculando"
       button.classList.add("loading");
       button.disabled = true;
 
       try {
-        // Obtiene IP pública
         const ipResponse = await fetch("https://api.ipify.org?format=json");
         const ipData = await ipResponse.json();
 
-        // Envía datos al Webhook
         const response = await fetch(webhookURL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -55,20 +64,19 @@
 
         const data = await response.json();
 
-        // 🔸 Muestra resultado
+        // Resultado con diseño ligeramente distinto
         resultadoDiv.style.display = "block";
         resultadoDiv.innerHTML = `
-          <div class="card2">
-              <h1>Resultado de la Operación</h1>
-              <p><strong>Operación:</strong> ${data.operacion}</p>
-              <p><strong>Resultado:</strong> ${data.resultado}</p>
+          <div class="card2" style="border-left:4px solid #f97316; text-align:left;">
+              <h1 style="font-size:1.3rem;">Resultado</h1>
+              <p><strong>Expresión enviada:</strong> ${data.operacion}</p>
+              <p><strong>Resultado final:</strong> ${data.resultado}</p>
           </div>
         `;
       } catch (err) {
         resultadoDiv.style.display = "block";
         resultadoDiv.innerHTML = `⚠️ Error: ${err.message}`;
       } finally {
-        // 🔸 Termina animación
         button.classList.remove("loading");
         button.disabled = false;
       }
@@ -78,4 +86,3 @@
   </script>
 </body>
 </html>
-
