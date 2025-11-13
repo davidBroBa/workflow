@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IA Smart Calc</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+  <div class="card">
+    <h1>IA Smart Calc</h1>
+    <p>Ingresa una expresión matemática y deja que la IA la procese por ti.</p>
+
+    <form id="calcForm">
+      <label for="operacion">Operación matemática <span style="color:red">*</span></label>
+      <textarea id="operacion" name="operacion" placeholder="Ejemplo: (12/3) + 7 - 2" required></textarea>
+
+      <button id="submitBtn" type="submit">
+        <span>Obtener resultado</span>
+      </button>
+    </form>
+
+    <div id="resultado"></div>
+
+    <div class="footer">
+      <p>Powered by n8n + IA</p>
+    </div>
+  </div>
+
+  <script>
+    const webhookURL = "https://daviddvd.app.n8n.cloud/webhook-test/6b4b9dcc-697c-4624-b5af-3910a1521aa4";
+
+    document.getElementById("calcForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const resultadoDiv = document.getElementById("resultado");
+      const button = document.getElementById("submitBtn");
+      const operacionTextarea = document.getElementById("operacion");
+
+      resultadoDiv.style.display = "none";
+      resultadoDiv.innerHTML = "";
+
+      const operacion = operacionTextarea.value.trim();
+      if (!operacion) {
+        resultadoDiv.style.display = "block";
+        resultadoDiv.innerHTML = "⚠️ Escribe una operación válida.";
+        return;
+      }
+
+      button.classList.add("loading");
+      button.disabled = true;
+
+      try {
+        const ipResponse = await fetch("https://api.ipify.org?format=json");
+        const ipData = await ipResponse.json();
+
+        const response = await fetch(webhookURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            operacion: operacion,
+            ip_publica: ipData.ip
+          })
+        });
+
+        if (!response.ok) throw new Error("Error al comunicarse con el servidor");
+
+        const data = await response.json();
+
+        resultadoDiv.style.display = "block";
+        resultadoDiv.innerHTML = `
+          <div class="card2">
+            <h1>Resultado</h1>
+            <p><strong>Expresión:</strong> ${data.operacion}</p>
+            <p><strong>Resultado:</strong> ${data.resultado}</p>
+            <button onclick="window.location.reload()">Nueva operación</button>
+          </div>
+        `;
+
+        operacionTextarea.value = "";
+
+      } catch (err) {
+        resultadoDiv.style.display = "block";
+        resultadoDiv.innerHTML = `⚠️ Error: ${err.message}`;
+      } finally {
+        button.classList.remove("loading");
+        button.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+</html>
